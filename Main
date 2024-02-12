@@ -1,0 +1,203 @@
+#include <iostream>
+//#include <windows.h>
+//#include "positionP3.h"
+#include "stackP3.h"
+#include <bits/stdc++.h>
+#include <fstream>
+
+//#include "fileReader.h"
+
+
+using namespace std;
+
+int main()
+{
+	cout << "MAZE SOLVER" << endl;
+    	const char ENTRANCE = 'o';
+    	const char EXIT = 'O';
+    	const char WALL = '1';
+    	const char ROAD = '0';
+    	const char EXPLORED = 'e';
+
+    	const int ROW = 30;
+    	const int COLUMN = 30;
+
+    
+
+    //	char maze [ROW][COLUMN] =
+    //	{
+//		    "11111",
+//		    "o0011",
+//		    "10001",
+//	 	    "1010O",
+//		    "11111",
+
+  // 	 };
+
+	char maze [ROW][COLUMN] =
+	{
+		"11111111111111111111",
+		"o0001101010101100101",
+		"11101000000111010011",
+		"11000010010100101101",
+		"11001000110001110101",
+		"11010000100100101011",
+		"11000110011100011111",
+		"11110101010110010101",
+		"11000101001100000111",
+		"11011111110101000111",
+		"10011101101100010111",
+		"11001001010100000111",
+		"10100001110101100011",
+		"11011101001100000111",
+		"11000001001110010111",
+		"11011001100101100111",
+		"11011001001100000111",
+		"11100001100100001111",
+		"11011001000111100111",
+		"1111111111111111O111",
+
+	};
+
+
+
+   	 Position mazeEntrance;
+   	 mazeEntrance.x = 1;
+   	 mazeEntrance.y = 0;
+
+   	 // Make two copies of the original map
+    	char mazeCopy[ROW][COLUMN];   // Used to calculate the path
+    	char mazeDisplay[ROW][COLUMN];   // Used to display the path
+    
+    	for (int i = 0; i < ROW; i++)
+    	{
+       		 for (int j = 0; j < COLUMN; j++)
+        	{
+         	   mazeCopy[i][j] = maze[i][j];
+         	   mazeDisplay[i][j] = maze[i][j];
+	       	}
+   	 }
+
+   	 Stack path(ROW*COLUMN);
+
+    	Position currentPosition;
+
+    	currentPosition = mazeEntrance;
+
+   	 while (true)
+    	{  
+	       //cout << "This is the while loop" << endl;	
+       		 if (mazeCopy[currentPosition.x][currentPosition.y] == EXIT) break;
+
+        // Get the maze element at each direction of the current position
+      		 char positionUp = mazeCopy[currentPosition.x - 1][currentPosition.y];
+       		 char positionRight = mazeCopy[currentPosition.x][currentPosition.y + 1];
+       		 char positionDown = mazeCopy[currentPosition.x + 1][currentPosition.y];
+       		 char positionLeft = mazeCopy[currentPosition.x][currentPosition.y - 1];
+
+        // Mark this position as explored, then go up one position
+        	if (( positionUp == ROAD || positionUp == EXIT ) && currentPosition.x - 1 >= 0)
+       		 {
+          		  path.Push(currentPosition);
+          		  mazeCopy[currentPosition.x][currentPosition.y] = EXPLORED;
+          		  currentPosition.x--;
+			  cout << "Moves up a position" << endl;
+      		  }
+
+        // Mark this position as explored, then go right one position
+       		 else if (( positionRight == ROAD || positionRight == EXIT) && currentPosition.y + 1 < COLUMN)
+     		   {
+       		     path.Push(currentPosition);
+       		     mazeCopy[currentPosition.x][currentPosition.y] = EXPLORED;
+			currentPosition.y++;
+			cout << "Moves right a position" << endl;
+       		 }
+
+        // Mark this position as explored, then go down one position
+       		 else if ((positionDown == ROAD || positionDown == EXIT) && currentPosition.x + 1 < ROW)
+     		   {
+       		     path.Push(currentPosition);
+       		     mazeCopy[currentPosition.x][currentPosition.y] = EXPLORED;
+       		     currentPosition.x++;
+		     cout << "Moves down a position" << endl;
+      		  }
+
+        // Mark this position as explored, then go left one position
+       		 else if ((positionLeft == ROAD || positionLeft == EXIT) && currentPosition.y >= 0)
+      		  {
+      		      path.Push(currentPosition);
+      		      mazeCopy[currentPosition.x][currentPosition.y] = EXPLORED;
+       		     currentPosition.y--;
+		     cout << "Moves Left a position" << endl;
+      		  }
+
+        // Mark this position as a WALL, then go back one position
+    		    else
+    		    {
+     		       mazeCopy[currentPosition.x][currentPosition.y] = WALL;
+     		       currentPosition = path.Pop();
+		       cout << "Hit a wall" << endl;
+     		   }
+  		  }
+    
+   	 int finalSize = path.GetLength();
+
+   	 Position *rightPath = new Position[ROW*COLUMN];
+
+   	 for (int i = finalSize - 1; i >= 0; i--)
+   	 {
+     	   rightPath[i] = path.Pop();
+  	  }
+
+
+
+    // Output the Animation of Walking the path
+
+   	 for (int i = 0; i < finalSize; i++)
+  	  {
+      		  cout << "Maze" << endl;
+      		  Position tempPosition = rightPath[i];
+       		 mazeDisplay[tempPosition.x][tempPosition.y] = '*';
+
+		 for (int a = 0; a < ROW; a++)
+      		  {
+       		     for (int b = 0; b < COLUMN; b++)
+           		 {
+           		     cout << mazeDisplay[a][b];
+          		  }
+         		   cout << endl;
+      		  }
+
+       		// sleep(200);
+        		//system("cls");
+        		mazeDisplay[tempPosition.x][tempPosition.y] = ' ';
+  	  }
+
+
+
+    // Print out the complete path
+
+   	 cout << "Original Map: " << endl;
+    	for (int a = 0; a < ROW; a++)
+    	{
+      		  for (int b = 0; b < COLUMN; b++)
+      		  {
+       		     cout << maze[a][b];
+      		  }
+     		   cout << endl;
+  	  }
+
+  	  cout << endl;
+  	  cout << "Correct Path: " << endl;
+
+   	 for (int i = 0; i < finalSize; i++)
+ 	   {
+    		    Position temp = rightPath[i];
+      		  cout << temp.x + 1 << "," << temp.y + 1 << '\t';
+      		  if ((i + 1) % 5 == 0) cout << endl;
+  	  }
+
+   	 cout << endl;
+
+    return 0;
+}
